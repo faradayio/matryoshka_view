@@ -1,6 +1,6 @@
 # MatryoshkaView
 
-TODO: Write a gem description
+Maintains a list of inner (subset/nested) views and their boundaries for a particular table. Helps you spawn new inner views and find the right one.
 
 ## Installation
 
@@ -20,7 +20,9 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+1. create a MatryoshkaView object with the base table name (`MatryoshkaView.new(:pets)`)
+2. maybe try to find a view that satisfies a boundary (`MatryoshkaView.new(:pets).find(age: [1,2])`)
+3. maybe create a new view within a boundary (`MatryoshkaView.new(:pets).spawn(conditions: { age: [0, 10] })`)
 
 ## Contributing
 
