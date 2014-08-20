@@ -65,7 +65,7 @@ class MatryoshkaView
         CREATE MATERIALIZED VIEW #{name} AS (
           SELECT *
           FROM #{quoted_base}
-          WHERE ST_Contains(#{quoted_base}.the_geom, ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote(the_geom_geojson)}), 4326))
+          WHERE ST_Contains(ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote(the_geom_geojson)}), 4326), #{quoted_base}.the_geom)
         )
       SQL
       record = Record.new
