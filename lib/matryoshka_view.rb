@@ -35,21 +35,25 @@ class MatryoshkaView
   SCHEMA_NAME = 'matryoshka_view'
 
   attr_reader :base
-  attr_reader :the_geom_geojson
+  attr_reader :geom_source
 
-  def initialize(base:, the_geom_geojson: nil, name: nil)
+  def initialize(base:, geom_source: nil, the_geom_geojson: nil, name: nil)
     @base = base
     @the_geom_geojson = the_geom_geojson
+    @geom_source = geom_source
     @name = name
   end
 
-  def lookup(the_geom_geojson)
+  def lookup(geom_source: nil, the_geom_geojson: nil)
     # FIXME move to Record class method
-    if inner = Record.where("ST_Contains(the_geom, ST_SetSRID(ST_GeomFromGeoJSON(#{quote(the_geom_geojson)}), 4326))").order("ST_Area(the_geom, false) ASC").first
-      inner.view
+    hit = if geom_source
+      Record.where("ST_Contains(the_geom, (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{quote(geom_source.id)}))").order("ST_Area(the_geom, false) ASC").first
+    elsif the_geom_geojson
+      Record.where("ST_Contains(the_geom, ST_SetSRID(ST_GeomFromGeoJSON(#{quote(the_geom_geojson)}), 4326))").order("ST_Area(the_geom, false) ASC").first
     else
-      self
+      raise "expecting geom_source or the_geom_geojson"
     end
+    hit.try(:view) || self
   end
 
   def spawn(attrs)
@@ -75,6 +79,10 @@ class MatryoshkaView
       record.the_geom_geojson = the_geom_geojson
       record.save!
     end
+  end
+
+  def the_geom_geojson
+    @the_geom_geojson ||= geom_source.try :the_geom_geojson
   end
 
   def quoted_base

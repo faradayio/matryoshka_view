@@ -16,7 +16,7 @@ unless ENV['FAST'] == 'true'
   system 'dropdb', '--if-exists', dbname
   system 'createdb', dbname
   system 'psql', dbname, '--command', 'CREATE EXTENSION postgis'
-  system 'psql', dbname, '--command', 'CREATE TABLE places (name text, the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
+  system 'psql', dbname, '--command', 'CREATE TABLE places (id serial primary key, the_geom geometry(Geometry,4326), the_geom_webmercator geometry(Geometry,3857))'
 end
 
 require 'active_record'

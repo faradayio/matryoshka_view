@@ -1,5 +1,9 @@
 unreleased
 
+* Breaking changes
+
+  * MatryoshkaView#lookup now takes geom_source: or the_geom_geojson: arguments
+
 * Bug fixes
 
   * Fix use of ST_Contains during view creation
