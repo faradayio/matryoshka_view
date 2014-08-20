@@ -39,14 +39,10 @@ class MatryoshkaView
     self.primary_key = 'name'
 
     COLUMNS = {
-      'base_name'  => 'text',
+      'base'  => 'text',
       'the_geom' => 'geometry(Geometry,4326)',
       'the_geom_webmercator' => 'geometry(Geometry,3857)',
     }
-
-    def base
-      base_name.constantize
-    end
 
     def view
       @view ||= begin

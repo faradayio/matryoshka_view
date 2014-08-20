@@ -23,10 +23,9 @@ class MatryoshkaView
         conn.select_values <<-SQL
           SELECT 1
           FROM   pg_catalog.pg_class mv
-          JOIN   pg_catalog.pg_namespace n ON n.oid = mv.relnamespace
-          WHERE  n.nspname = '#{SCHEMA_NAME}'
-          AND mv.oid::regclass::text IN (#{expected_names.map { |name| conn.quote(name) }.join(',')})
-          AND mv.relkind = 'm'
+          WHERE
+            mv.oid::regclass::text IN (#{expected_names.map { |name| conn.quote(name) }.join(',')})
+            AND mv.relkind = 'm'
         SQL
       end
       result.length == expected_names.length
@@ -38,9 +37,10 @@ class MatryoshkaView
   attr_reader :base
   attr_reader :the_geom_geojson
 
-  def initialize(base:, the_geom_geojson: nil)
+  def initialize(base:, the_geom_geojson: nil, name: nil)
     @base = base
     @the_geom_geojson = the_geom_geojson
+    @name = name
   end
 
   def lookup(the_geom_geojson)
@@ -52,8 +52,8 @@ class MatryoshkaView
     end
   end
 
-  def spawn(the_geom_geojson)
-    child = MatryoshkaView.new base: base, the_geom_geojson: the_geom_geojson
+  def spawn(attrs)
+    child = MatryoshkaView.new attrs.reverse_merge(base: base)
     child.spawn!
     child
   end
@@ -64,22 +64,22 @@ class MatryoshkaView
       c.execute <<-SQL
         CREATE MATERIALIZED VIEW #{name} AS (
           SELECT *
-          FROM #{quoted_base_table_name}
-          WHERE ST_Contains(#{quoted_base_table_name}.the_geom, ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote(the_geom_geojson)}), 4326))
+          FROM #{quoted_base}
+          WHERE ST_Contains(#{quoted_base}.the_geom, ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote(the_geom_geojson)}), 4326))
         )
       SQL
       record = Record.new
       record.name = name
-      record.base_name = base.name
+      record.base = base
       record.save!
       record.the_geom_geojson = the_geom_geojson
       record.save!
     end
   end
 
-  def quoted_base_table_name
-    @quoted_base_table_name ||= with_connection do |c|
-      base.table_name.split('.', 2).map { |part| c.quote_column_name(part) }.join('.')
+  def quoted_base
+    @quoted_base ||= with_connection do |c|
+      base.split('.', 2).map { |part| c.quote_column_name(part) }.join('.')
     end
   end
 
@@ -87,7 +87,7 @@ class MatryoshkaView
     @name ||= if inner?
       "#{SCHEMA_NAME}.t#{HashDigest.digest3(uniq_attrs)}"
     else
-      base.table_name
+      base
     end
   end
 
@@ -107,7 +107,7 @@ class MatryoshkaView
 
   def uniq_attrs
     {
-      base_table_name: base.table_name,
+      base_table_name: base,
       the_geom_geojson: the_geom_geojson,
     }
   end
@@ -140,7 +140,7 @@ class MatryoshkaView
   # db helper to make sure we immediately return connections to pool
   # @private
   def with_connection
-    base.connection_pool.with_connection do |conn|
+    ActiveRecord::Base.connection_pool.with_connection do |conn|
       yield conn
     end
   end

@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe MatryoshkaView do
-  let(:world)               { MatryoshkaView.new(base: Place) }
-  let(:burlington)          { world.spawn place(:burlington) }
-  let(:south_burlington)    { world.spawn place(:south_burlington) }
-  let(:downtown_burlington) { world.spawn place(:downtown_burlington) }
+  let(:world)               { MatryoshkaView.new(base: Place.table_name) }
+  let(:burlington)          { world.spawn the_geom_geojson: place(:burlington) }
+  let(:south_burlington)    { world.spawn the_geom_geojson: place(:south_burlington) }
+  let(:downtown_burlington) { world.spawn the_geom_geojson: place(:downtown_burlington) }
 
   def place(name)
     TheGeomGeoJSON::EXAMPLES.fetch name
@@ -24,6 +24,11 @@ describe MatryoshkaView do
     expect(MatryoshkaView.view_exists?(burlington.from_sql)).to be_truthy
   end
 
+  it "lets you specify an name name" do
+    world.spawn the_geom_geojson: place(:burlington), name: 'magic'
+    expect(MatryoshkaView.view_exists?('magic')).to be_truthy
+  end
+
   describe "after spawning a matryoshka view" do
     before do
       burlington
@@ -35,6 +40,10 @@ describe MatryoshkaView do
 
     it "falls back to original table outside boundaries" do
       expect(world.lookup(place(:montreal))).to eq(world)
+    end
+
+    xit "doesn't confuse bases" do
+      # you can only use this with one base table
     end
   end
 
@@ -69,6 +78,10 @@ describe MatryoshkaView do
     it "has the same columns" do
       expect(ActiveRecord::Base.connection.columns(burlington.from_sql).map(&:name)).to match_array(ActiveRecord::Base.connection.columns(world.from_sql).map(&:name))
     end
+  end
+
+  describe "optimizing view creation" do
+    # even if you tell a view it's based on nationwide, it should see if there is a smaller view that it can base itself on
   end
 
 end

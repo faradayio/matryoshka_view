@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = MatryoshkaView::VERSION
   spec.authors       = ["Seamus Abshere"]
   spec.email         = ["seamus@abshere.net"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{Maintains a list of inner (subset/nested) views and their geometic boundaries for a particular table.}
+  spec.description   = %q{Helps you spawn new inner views and lookup the right one.}
+  spec.homepage      = "https://github.com/faradayio/matryoshka_view"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
