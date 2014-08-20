@@ -14,8 +14,16 @@ class MatryoshkaView
           existing_columns = column_names
           if (missing_columns = COLUMNS.keys - column_names).any?
             activity = true
-            add_columns = missing_columns.map {|c| %{ADD COLUMN "#{c}" #{COLUMNS[c]}} }
+            add_columns = missing_columns.map {|name| %{ADD COLUMN "#{name}" #{COLUMNS[name]}} }
             c.execute "ALTER TABLE #{quoted_table_name} #{add_columns.join(',')}"
+            missing_columns.each do |name|
+              case name
+              when /the_geom/
+                c.execute "CREATE INDEX ON #{quoted_table_name} USING gist(#{name})"
+              else
+                c.execute "CREATE INDEX ON #{quoted_table_name} (#{name})"
+              end
+            end
           end
           if activity
             c.schema_cache.clear!
