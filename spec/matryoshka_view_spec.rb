@@ -1,72 +1,73 @@
 require 'spec_helper'
 
 describe MatryoshkaView do
-  let(:outer) { MatryoshkaView.new(:numbers) }
+  let(:world)               { MatryoshkaView.new(base: Place) }
+  let(:burlington)          { world.spawn place(:burlington) }
+  let(:south_burlington)    { world.spawn place(:south_burlington) }
+  let(:downtown_burlington) { world.spawn place(:downtown_burlington) }
 
-  it "just gives you back the original table name by default" do
-    expect(outer.name).to eq('numbers')
+  def place(name)
+    TheGeomGeoJSON::EXAMPLES.fetch name
+  end
+
+  it "just gives you back the base by default" do
+    expect(world.from_sql).to eq('places')
   end
 
   it "doesn't auto-create anything" do
-    expect(outer.find(x: 1)).to eq(outer)
-    expect(outer.find(x: 10)).to eq(outer)
+    expect(world.lookup(place(:burlington_point))).to eq(world)
+    expect(world.lookup(place(:barre_point))).to eq(world)
   end
 
-  it "helps you spawn inner views" do
-    inner = outer.spawn conditions: { x: [1,2] }
-    expect(ActiveRecord::Base.connection.table_exists?(inner.name)).to be_truthy
-  end
-
-  it "lets you name inner views as you spawn them" do
-    inner = outer.spawn conditions: { x: [1,2] }, name: 'magic'
-    expect(inner.name).to eq('magic')
+  it "helps you spawn inner views given geojson" do
+    burlington # spawn it
+    expect(MatryoshkaView.view_exists?(burlington.from_sql)).to be_truthy
   end
 
   describe "after spawning a matryoshka view" do
-    let(:inner) { outer.spawn conditions: { x: [1,2] } }
+    before do
+      burlington
+    end
 
     it "tells you what view to use inside boundaries (inclusive)" do
-      expect(outer.find(x: 1)).to eq(inner)
-      expect(outer.find(x: 2)).to eq(inner)
+      expect(world.lookup(place(:burlington_point))).to eq(burlington)
     end
 
     it "falls back to original table outside boundaries" do
-      expect(outer.find(x: 0)).to eq(inner)
-      expect(outer.find(x: 3)).to eq(inner)
+      expect(world.lookup(place(:montreal))).to eq(world)
     end
   end
 
   describe "non-overlapping matryoshka views" do
-    let(:one_to_ten)       { outer.spawn conditions: { x: [ 1,10] } }
-    let(:eleven_to_twenty) { outer.spawn conditions: { x: [11,20] } }
+    before do
+      south_burlington
+      downtown_burlington
+    end
 
     it "chooses the right view" do
-      expect(outer.find(x: 1)).to eq(one_to_ten)
-      expect(outer.find(x: 11)).to eq(eleven_to_twenty)
+      expect(world.lookup(place(:south_burlington_point))).to eq(south_burlington)
+      expect(world.lookup(place(:downtown_burlington_point))).to eq(downtown_burlington)
     end
 
     it "falls back to original table outside boundaries" do
-      expect(outer.find(x: 0)).to eq(outer)
-      expect(outer.find(x: 21)).to eq(outer)
+      expect(world.lookup(place(:montreal))).to eq(world)
     end
   end
 
   describe "overlapping matryoshka views" do
-    let(:one_to_ten)     { outer.spawn conditions: { x: [ 1,10] } }
-    let(:one_to_twenty)  { outer.spawn conditions: { x: [ 1,20] } }
-    let(:ten_to_twenty)  { outer.spawn conditions: { x: [10,20] } }
+    before do
+      burlington
+      south_burlington
+    end
 
     it "chooses the smaller view" do
-      expect(outer.find(x: 1)).to eq(one_to_ten)
-      expect(outer.find(x: 11)).to eq(ten_to_twenty)
+      expect(world.lookup(place(:south_burlington_point))).to eq(south_burlington)
     end
   end
 
   describe "contents of matryoshka views" do
-    let(:inner) { outer.spawn conditions: { x: [-Float::Infinity, Float::Infinity] } }
-
     it "has the same columns" do
-      expect(ActiveRecord::Base.connection.column_names(inner.name)).to match_array(ActiveRecord::Base.connection.column_names(outer.name))
+      expect(ActiveRecord::Base.connection.columns(burlington.from_sql).map(&:name)).to match_array(ActiveRecord::Base.connection.columns(world.from_sql).map(&:name))
     end
   end
 

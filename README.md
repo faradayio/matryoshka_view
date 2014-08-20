@@ -1,6 +1,6 @@
 # MatryoshkaView
 
-Maintains a list of inner (subset/nested) views and their boundaries for a particular table. Helps you spawn new inner views and find the right one.
+Maintains a list of inner (subset/nested) views and their geometic boundaries for a particular table. Helps you spawn new inner views and lookup the right one.
 
 ## Installation
 
@@ -20,9 +20,9 @@ Or install it yourself as:
 
 ## Usage
 
-1. create a MatryoshkaView object with the base table name (`MatryoshkaView.new(:pets)`)
-2. maybe try to find a view that satisfies a boundary (`MatryoshkaView.new(:pets).find(age: [1,2])`)
-3. maybe create a new view within a boundary (`MatryoshkaView.new(:pets).spawn(conditions: { age: [0, 10] })`)
+1. create a MatryoshkaView object with the base table name (`MatryoshkaView.new(base: Place)`)
+2. maybe try to lookup a view that satisfies a boundary (`MatryoshkaView.new(base: Place).lookup(the_geom_geojson_of_massachusetts)`)
+3. maybe create a new view within a boundary (`MatryoshkaView.new(base: Place).spawn(the_geom_geojson_of_boston)`)
 
 ## Contributing
 
