@@ -47,7 +47,7 @@ class MatryoshkaView
     def view
       @view ||= begin
         save!
-        MatryoshkaView.new base: base, the_geom_geojson: the_geom_geojson
+        MatryoshkaView.new name: name, base: base, the_geom_geojson: the_geom_geojson
       end
     end
 
