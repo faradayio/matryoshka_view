@@ -33,7 +33,7 @@ describe MatryoshkaView do
     it "lets you specify an name name" do
       world.spawn the_geom_geojson: geojson(:burlington), name: 'magic'
       expect(MatryoshkaView.view_exists?('magic')).to be_truthy
-      ActiveRecord::Base.connection.execute 'DROP MATERIALIZED VIEW magic CASCADE'
+      ActiveRecord::Base.connection.execute 'DROP TABLE magic CASCADE'
     end
 
     describe "after spawning a matryoshka view" do

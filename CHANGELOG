@@ -1,3 +1,9 @@
+2014-08-21 / 0.2.0
+
+* Breaking changes
+
+  * Switch to CREATE TABLE ... LIKE instead of materialized views
+
 2014-08-20 / 0.1.2
 
 * Bug fixes

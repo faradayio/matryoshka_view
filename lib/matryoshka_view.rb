@@ -25,7 +25,7 @@ class MatryoshkaView
           FROM   pg_catalog.pg_class mv
           WHERE
             mv.oid::regclass::text IN (#{expected_names.map { |name| conn.quote(name) }.join(',')})
-            AND mv.relkind = 'm'
+            AND mv.relkind = 'r'
         SQL
       end
       result.length == expected_names.length
@@ -66,11 +66,13 @@ class MatryoshkaView
     with_connection do |c|
       c.execute "CREATE SCHEMA IF NOT EXISTS #{SCHEMA_NAME}"
       c.execute <<-SQL
-        CREATE MATERIALIZED VIEW #{name} AS (
+        CREATE TABLE #{name} (LIKE #{quoted_base} INCLUDING ALL)
+      SQL
+      c.execute <<-SQL
+        INSERT INTO #{name}
           SELECT *
           FROM #{quoted_base}
           WHERE ST_Contains(ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote(the_geom_geojson)}), 4326), #{quoted_base}.the_geom)
-        )
       SQL
       record = Record.new
       record.name = name
