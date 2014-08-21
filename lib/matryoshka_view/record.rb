@@ -31,6 +31,12 @@ class MatryoshkaView
           end
         end
       end
+
+      def cleanup
+        find_each do |record|
+          record.destroy unless record.exists?
+        end
+      end
     end
 
     include TheGeomGeoJSON::ActiveRecord
@@ -47,8 +53,15 @@ class MatryoshkaView
     def view
       @view ||= begin
         save!
+        unless exists?
+          raise "missing #{name} (#{inspect})"
+        end
         MatryoshkaView.new name: name, base: base, the_geom_geojson: the_geom_geojson
       end
+    end
+
+    def exists?
+      MatryoshkaView.view_exists? name
     end
 
   end

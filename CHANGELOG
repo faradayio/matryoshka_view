@@ -2,6 +2,10 @@
 
   * Don't ignore custom name when you find an old view
 
+* Enhancements
+
+  * Provide MatryoshkaView::Record.cleanup
+
 2014-08-20 / 0.1.1
 
 * Enhancements
