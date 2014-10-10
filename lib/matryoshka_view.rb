@@ -47,9 +47,9 @@ class MatryoshkaView
   def lookup(geom_source: nil, the_geom_geojson: nil)
     # FIXME move to Record class method
     hit = if geom_source
-      Record.where("ST_Contains(ST_Buffer(the_geom, 0.00001), (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{quote(geom_source.id)}))").order("ST_Area(the_geom, false) ASC").first
+      Record.where("ST_Contains(ST_Expand(the_geom, 0.00001), (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{quote(geom_source.id)})) AND ST_Contains(ST_Buffer(the_geom, 0.00001), (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{quote(geom_source.id)}))").order("ST_Area(the_geom, false) ASC").first
     elsif the_geom_geojson
-      Record.where("ST_Contains(ST_Buffer(the_geom, 0.00001), ST_SetSRID(ST_GeomFromGeoJSON(#{quote(the_geom_geojson)}), 4326))").order("ST_Area(the_geom, false) ASC").first
+      Record.where("ST_Contains(ST_Expand(the_geom, 0.00001), ST_SetSRID(ST_GeomFromGeoJSON(#{quote(the_geom_geojson)}), 4326)) AND ST_Contains(ST_Buffer(the_geom, 0.00001), ST_SetSRID(ST_GeomFromGeoJSON(#{quote(the_geom_geojson)}), 4326))").order("ST_Area(the_geom, false) ASC").first
     else
       raise "expecting geom_source or the_geom_geojson"
     end

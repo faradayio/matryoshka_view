@@ -1,3 +1,9 @@
+2014-10-10 / 0.2.2
+
+* Enhancements
+
+  * Speed things up with an explicit bbox check followed by the buffer query
+
 2014-10-09 / 0.2.1
 
 * Bug fixes
