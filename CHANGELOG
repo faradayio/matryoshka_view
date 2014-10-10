@@ -1,3 +1,9 @@
+2014-10-09 / 0.2.1
+
+* Bug fixes
+
+  * Properly determine containers - before we were inadvertently drawing a box around container geoms, which resulted in false positives
+
 2014-08-21 / 0.2.0
 
 * Breaking changes
