@@ -1,3 +1,5 @@
+2014-10-12 / 0.2.3
+
 * Enhancements
 
   * Speed things up by just using && for bbox check; ST_Contains not needed.
