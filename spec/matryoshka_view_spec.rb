@@ -22,7 +22,7 @@ describe MatryoshkaView do
 
     it "doesn't auto-create anything" do
       expect(world.lookup(the_geom_geojson: geojson(:burlington_point))).to eq(world)
-      expect(world.lookup(the_geom_geojson: geojson(:barre_point))).to eq(world)
+      expect(world.lookup(the_geom_geojson: geojson(:montpelier_point))).to eq(world)
     end
 
     it "helps you spawn inner views given geojson" do
@@ -46,7 +46,7 @@ describe MatryoshkaView do
       end
 
       it "falls back to original table outside boundaries" do
-        expect(world.lookup(the_geom_geojson: geojson(:montreal))).to eq(world)
+        expect(world.lookup(the_geom_geojson: geojson(:montreal_canada))).to eq(world)
       end
 
       xit "doesn't confuse bases" do
@@ -57,16 +57,16 @@ describe MatryoshkaView do
     describe "non-overlapping matryoshka views" do
       before do
         south_burlington
-        downtown_burlington
+        burlington_downtown
       end
 
       it "chooses the right view" do
         expect(world.lookup(the_geom_geojson: geojson(:south_burlington_point))).to eq(south_burlington)
-        expect(world.lookup(the_geom_geojson: geojson(:downtown_burlington_point))).to eq(downtown_burlington)
+        expect(world.lookup(the_geom_geojson: geojson(:burlington_downtown_point))).to eq(burlington_downtown)
       end
 
       it "falls back to original table outside boundaries" do
-        expect(world.lookup(the_geom_geojson: geojson(:montreal))).to eq(world)
+        expect(world.lookup(the_geom_geojson: geojson(:montreal_canada))).to eq(world)
       end
     end
 
@@ -95,7 +95,7 @@ describe MatryoshkaView do
   describe 'with the_geom_geojson' do
     let(:burlington)          { world.spawn the_geom_geojson: geojson(:burlington) }
     let(:south_burlington)    { world.spawn the_geom_geojson: geojson(:south_burlington) }
-    let(:downtown_burlington) { world.spawn the_geom_geojson: geojson(:downtown_burlington) }
+    let(:burlington_downtown) { world.spawn the_geom_geojson: geojson(:burlington_downtown) }
 
     it_behaves_like 'OK'
   end
@@ -103,7 +103,7 @@ describe MatryoshkaView do
   describe 'with geom_source' do
     let(:burlington)          { world.spawn geom_source: place(:burlington) }
     let(:south_burlington)    { world.spawn geom_source: place(:south_burlington) }
-    let(:downtown_burlington) { world.spawn geom_source: place(:downtown_burlington) }
+    let(:burlington_downtown) { world.spawn geom_source: place(:burlington_downtown) }
 
     it_behaves_like 'OK'
   end
