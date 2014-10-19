@@ -1,6 +1,8 @@
+2014-10-19 / 0.2.4
+
 * Enhancements
 
-  * No need for ST_Expand with &&
+  * Faster - no need for ST_Expand with &&
 
 2014-10-12 / 0.2.3
 
