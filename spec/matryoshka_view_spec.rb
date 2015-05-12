@@ -108,5 +108,17 @@ describe MatryoshkaView do
     it_behaves_like 'OK'
   end
 
+  describe 'with the_geom' do
+    let(:burlington)          { world.spawn geom_source: place(:burlington) }
+    it "tells you what view to use inside boundaries (inclusive)" do
+      burlington
+      expect(world.lookup(geom_source: place(:burlington_point))).to eq(burlington)
+    end
+
+    it "falls back to original table outside boundaries" do
+      burlington
+      expect(world.lookup(geom_source: place(:montreal_canada))).to eq(world)
+    end
+  end
 
 end
