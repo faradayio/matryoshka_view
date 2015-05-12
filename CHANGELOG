@@ -1,3 +1,9 @@
+2015-05-12 / 0.2.5
+
+* Enhancements
+
+  * Use geom_source.the_geom if geom_source has changed
+
 2014-10-19 / 0.2.4
 
 * Enhancements
