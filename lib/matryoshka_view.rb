@@ -46,20 +46,18 @@ class MatryoshkaView
 
   def lookup(geom_source: nil, the_geom_geojson: nil)
     # FIXME move to Record class method
-    hit = if geom_source
-      with_connection do |c|
+    hit = with_connection do |c|
+      if geom_source
         if geom_source.changed?
-          Record.where("(the_geom && #{c.quote geom_source.the_geom}) AND ST_Contains(ST_Buffer(the_geom, 0.00001), #{c.quote geom_source.the_geom})").order("ST_Area(the_geom, false) ASC").first
+          Record.where("(base = #{c.quote base}) AND (the_geom && #{c.quote geom_source.the_geom}) AND ST_Contains(ST_Buffer(the_geom, 0.00001), #{c.quote geom_source.the_geom})").order("ST_Area(the_geom, false) ASC").first
         else
-          Record.where("(the_geom && (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{c.quote(geom_source.id)})) AND ST_Contains(ST_Buffer(the_geom, 0.00001), (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{c.quote(geom_source.id)}))").order("ST_Area(the_geom, false) ASC").first
+          Record.where("(base = #{c.quote base}) AND (the_geom && (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{c.quote(geom_source.id)})) AND ST_Contains(ST_Buffer(the_geom, 0.00001), (SELECT the_geom FROM #{geom_source.class.quoted_table_name} WHERE id = #{c.quote(geom_source.id)}))").order("ST_Area(the_geom, false) ASC").first
         end
+      elsif the_geom_geojson
+        Record.where("(base = #{c.quote base}) AND (the_geom && ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote the_geom_geojson}), 4326)) AND ST_Contains(ST_Buffer(the_geom, 0.00001), ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote the_geom_geojson}), 4326))").order("ST_Area(the_geom, false) ASC").first
+      else
+        raise "expecting geom_source or the_geom_geojson"
       end
-    elsif the_geom_geojson
-      with_connection do |c|
-        Record.where("the_geom && ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote the_geom_geojson}), 4326) AND ST_Contains(ST_Buffer(the_geom, 0.00001), ST_SetSRID(ST_GeomFromGeoJSON(#{c.quote the_geom_geojson}), 4326))").order("ST_Area(the_geom, false) ASC").first
-      end
-    else
-      raise "expecting geom_source or the_geom_geojson"
     end
     hit.try(:view) || self
   end

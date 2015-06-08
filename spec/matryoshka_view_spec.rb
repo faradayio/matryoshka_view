@@ -119,6 +119,12 @@ describe MatryoshkaView do
       burlington
       expect(world.lookup(geom_source: place(:montreal_canada))).to eq(world)
     end
+
+    it "doesn't confuse bases" do
+      other_world = MatryoshkaView.new(base: 'gibberish')
+      burlington
+      expect(other_world.lookup(geom_source: place(:burlington_point))).to eq(other_world)
+    end
   end
 
 end
